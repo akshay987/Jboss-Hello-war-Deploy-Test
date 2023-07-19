@@ -21,4 +21,4 @@ jobs:
           WAR_PATH: '${{ github.workspace }}/dist'
         run: |
           
-          curl -u "${JBOSS_USERNAME}:${JBOSS_PASSWORD}" -X POST -H "Expect:" -F "file=@${WAR_PATH}" "${JBOSS_ENDPOINT}/management-webapp/upload?name=$(basename ${WAR_PATH})&runtime-name=$(basename ${WAR_PATH})&server-group=main-server-group"
+          curl -u "${JBOSS_USERNAME}:${JBOSS_PASSWORD}" -X POST -H "Expect:" -F "file=@${WAR_PATH}" "${JBOSS_ENDPOINT}/management-webapp/upload?name=$(${WAR_PATH})&runtime-name=$(${WAR_PATH})&server-group=main-server-group"
