@@ -26,7 +26,7 @@ jobs:
           JBOSS_PASSWORD: ${{ secrets.JBOSS_PASSWORD }}
         run: |
           # Set up JBoss deployment URL
-          DEPLOY_URL="${JBOSS_ENDPOINT}/management-webapp/undeploy?name=helloworld.war"
+          DEPLOY_URL="${JBOSS_ENDPOINT}/management-webapp/undeploy?name=dist/helloworld.war"
           DEPLOY_URL+="&user=${JBOSS_USERNAME}&password=${JBOSS_PASSWORD}"
 
           # Undeploy any existing deployment with the same name
@@ -34,7 +34,7 @@ jobs:
 
           # Deploy the WAR file
           DEPLOY_URL="${JBOSS_ENDPOINT}/management-webapp/deploy"
-          DEPLOY_URL+="?name=helloworld.war&runtime-name=helloworld.war&user=${JBOSS_USERNAME}&password=${JBOSS_PASSWORD}"
+          DEPLOY_URL+="?name=dist/helloworld.war&runtime-name=helloworld.war&user=${JBOSS_USERNAME}&password=${JBOSS_PASSWORD}"
           DEPLOY_URL+="&server-group=main-server-group"
 
           curl --request POST --data-binary @deployments/helloworld.war $DEPLOY_URL
