@@ -1,37 +1,40 @@
 name: Deploy WAR to JBoss
 
-#on:
-  #push:
-    #branches:
-      #- master
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Deploy the package to the remote server
-        uses: garygrossgarten/github-action-scp@release
-        with:
-          local: dist/helloworld.war
-          remote: demo/actions/helloworld.war
-          host: ${{secrets.JBOSS_ENDPOINT}}
-          username: ${{ secrets.JBOSS_USERNAME }}
-          password: ${{ secrets.JBOSS_PASSWORD }}
-      - name: run a script on server (start the application)
-        if: always()
-        uses: fifsky/ssh-actions@master
-        with:
-          command: |
-            cd demo/actions/ && java -jar helloworld.war &
-          host: ${{secrets.JBOSS_ENDPOINT}}
-          username: ${{ secrets.JBOSS_USERNAME }}
-          password: ${{ secrets.JBOSS_PASSWORD }}
-          args: "-tt"
+      
+      - name: Deploy WAR to JBoss
+        env:
+          JBOSS_ENDPOINT: 'http://127.0.0.1:9990/'
+          JBOSS_USERNAME: ${{ secrets.JBOSS_USERNAME }}
+          JBOSS_PASSWORD: ${{ secrets.JBOSS_PASSWORD }}
+        run: |
+          # Set up JBoss deployment URL
+          DEPLOY_URL="${JBOSS_ENDPOINT}/management-webapp/undeploy?name=helloworld.war"
+          DEPLOY_URL+="&user=${JBOSS_USERNAME}&password=${JBOSS_PASSWORD}"
+
+          # Undeploy any existing deployment with the same name
+          curl --request POST $DEPLOY_URL
+
+          # Deploy the WAR file
+          DEPLOY_URL="${JBOSS_ENDPOINT}/management-webapp/deploy"
+          DEPLOY_URL+="?name=helloworld.war&runtime-name=helloworld.war&user=${JBOSS_USERNAME}&password=${JBOSS_PASSWORD}"
+          DEPLOY_URL+="&server-group=main-server-group"
+
+          curl --request POST --data-binary @deployments/helloworld.war $DEPLOY_URL
