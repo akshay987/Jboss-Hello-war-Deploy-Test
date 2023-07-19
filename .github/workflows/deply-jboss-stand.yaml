@@ -8,6 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      JBOSS_ENDPOINT: ${{ secrets.JBOSS_ENDPOINT }}
+      JBOSS_USERNAME: ${{ secrets.JBOSS_USERNAME }}
+      JBOSS_PASSWORD: ${{ secrets.JBOSS_PASSWORD }}
+      WAR_PATH: 'dist/helloworld.war'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -16,15 +21,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'    
-      #- name: Deploy WAR to JBoss
-        env:
-          JBOSS_ENDPOINT: ${{ secrets.JBOSS_ENDPOINT }}
-          JBOSS_USERNAME: ${{ secrets.JBOSS_USERNAME }}
-          JBOSS_PASSWORD: ${{ secrets.JBOSS_PASSWORD }}
-          WAR_PATH: 'dist/helloworld.war'
        
       - name: Deploy to Jboss
         run: |
-          curl -u $JBOSS_USERNAME:$JBOSS_PASSWORD -T $WAR_PATH $JBOSS_ENDPOINT/management-webapp/undeploy?name=$($WAR_PATH)
+          curl -u $JBOSS_USERNAME $JBOSS_PASSWORD -T $WAR_PATH $JBOSS_ENDPOINT/management-webapp/undeploy?name=$($WAR_PATH)
           sleep 5
-          curl -u $JBOSS_USERNAME:$JBOSS_PASSWORD -T $WAR_PATH $JBOSS_ENDPOINT/management-webapp/deploy?name=$($WAR_PATH)
+          curl -u $JBOSS_USERNAME $JBOSS_PASSWORD -T $WAR_PATH $JBOSS_ENDPOINT/management-webapp/deploy?name=$($WAR_PATH)
