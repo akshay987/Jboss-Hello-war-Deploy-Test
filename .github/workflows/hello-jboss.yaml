@@ -1,0 +1,24 @@
+name: Deploy WAR to JBoss
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy WAR to JBoss
+        env:
+          JBOSS_ENDPOINT: 'http://127.0.0.1:9990'
+          JBOSS_USERNAME: ${{ secrets.JBOSS_USERNAME }}
+          JBOSS_PASSWORD: ${{ secrets.JBOSS_PASSWORD }}
+          WAR_PATH: '${{ github.workspace }}/dist'
+        run: |
+          
+          curl -u "${JBOSS_USERNAME}:${JBOSS_PASSWORD}" -X POST -H "Expect:" -F "file=@${WAR_PATH}" "${JBOSS_ENDPOINT}/management-webapp/upload?name=$(basename ${WAR_PATH})&runtime-name=$(basename ${WAR_PATH})&server-group=main-server-group"
